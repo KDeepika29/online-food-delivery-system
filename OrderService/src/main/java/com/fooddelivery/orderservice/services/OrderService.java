@@ -20,22 +20,24 @@ public class OrderService {
     }
 
     public Optional<Order> getOrderById(Long id) {
-        // logic to get order by id
-        return Optional.empty();
+        return orderRepository.findById(id);
     }
 
     public Order updateOrderStatus(Long id, String status) {
-        // logic to update order status
-        return new Order();
+        Optional<Order> orderOptional = orderRepository.findById(id);
+        if (orderOptional.isPresent()) {
+            Order order = orderOptional.get();
+            order.setStatus(status);
+            return orderRepository.save(order);
+        }
+        return null;
     }
 
     public List<Order> getOrdersByUserId(Long userId) {
-        // logic to get orders by user id
-        return List.of();
+        return orderRepository.findByUserId(userId);
     }
 
     public List<Order> getOrdersByRestaurantId(Long restaurantId) {
-        // logic to get orders by restaurant id
-        return List.of();
+        return orderRepository.findByRestaurantId(restaurantId);
     }
 }
