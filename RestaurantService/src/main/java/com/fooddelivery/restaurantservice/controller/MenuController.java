@@ -54,9 +54,4 @@ public class MenuController {
 		return ResponseEntity.ok("Menu item deleted successfully.");
     }
 	
-    @GetMapping("/search")
-    public ResponseEntity<MenuItemEntity> searchMenu(@RequestParam Map<String, String> filter) {
-		List<SearchResultTO> searchResults = menuService.searchMenu(filter);
-		return ResponseEntity.ok(searchResults);
-	}
 }
