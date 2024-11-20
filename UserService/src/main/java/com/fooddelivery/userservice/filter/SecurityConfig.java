@@ -1,55 +1,33 @@
 package com.fooddelivery.userservice.filter;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.stereotype.Component;
 
 @Configuration
-@EnableWebSecurity
-public class SecurityConfig {
+@Component
+@EnableGlobalMethodSecurity(prePostEnabled=true,proxyTargetClass=true)
+public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-    private final JwtRequestFilter jwtRequestFilter;
+	@Autowired
+	private JwtRequestFilter jwtRequestFilter;
 
-    @Autowired
-    public SecurityConfig(@Lazy JwtRequestFilter jwtRequestFilter) {
-        this.jwtRequestFilter = jwtRequestFilter;
-    }
+	@Autowired
+	private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint; // Inject the entry point
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-            .csrf(AbstractHttpConfigurer::disable)
-            .authorizeRequests(auth -> auth
-                .antMatchers("/api/user/register", "/api/user/login").permitAll()
-                .anyRequest().authenticated()
-            )
-            .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            );
+	@Override
+	protected void configure(HttpSecurity http) throws Exception {
+		http.csrf().disable().authorizeRequests().antMatchers("/user/register").permitAll()
+				.antMatchers("/user/login").permitAll()
+				.antMatchers("/user/profile").hasAnyRole("USER")
+				.antMatchers("/user/update-profile").hasAnyRole("USER")
+				.anyRequest().authenticated().and().exceptionHandling()
+				.authenticationEntryPoint(jwtAuthenticationEntryPoint); // Use custom entry point
 
-        http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
-
-        return http.build();
-    }
-
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
-        return authenticationConfiguration.getAuthenticationManager();
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+		http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+	}
 }

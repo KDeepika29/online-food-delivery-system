@@ -16,7 +16,7 @@ import com.fooddelivery.userservice.dto.User;
 import com.fooddelivery.userservice.service.UserService;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/user")
 public class UserController {
 
 	@Autowired
@@ -38,11 +38,11 @@ public class UserController {
 	// Get the user's profile
 	@GetMapping("/profile")
 	public ResponseEntity<User> getProfile(@RequestParam String username) {
-		return ResponseEntity.ok(userService.getUserDetails(username));
+		return ResponseEntity.ok(userService.getUserProfile(username));
 	}
 
 	// Update the user's profile
-	@PutMapping("/profile")
+	@PutMapping("/update-profile")
 	public ResponseEntity<String> updateProfile(@RequestParam UUID userId, @RequestBody User user) {
 		return ResponseEntity.ok(userService.updateUserProfile(userId, user.getPasswordHash(), user.getPhone()));
 	}

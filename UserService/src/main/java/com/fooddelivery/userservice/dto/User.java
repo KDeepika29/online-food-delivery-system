@@ -104,4 +104,15 @@ public class User {
 	public void setUpdatedAt(LocalDateTime updatedAt) {
 		this.updatedAt = updatedAt;
 	}
+
+	public User(String username, String email, String passwordHash, String phone) {
+		this.id = UUID.randomUUID();
+		this.username = username;
+		this.email = email;
+		this.passwordHash = passwordHash;
+		this.phone = phone;
+
+		this.createdAt = LocalDateTime.now();
+		this.updatedAt = this.createdAt;
+	}
 }
