@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import com.fooddelivery.restaurantservice.exceptions.MenuCreationException;
 import com.fooddelivery.restaurantservice.dao.MenuCategoryDao;
 import com.fooddelivery.restaurantservice.dao.MenuDao;
 import com.fooddelivery.restaurantservice.dao.RestaurantDao;
@@ -42,7 +43,7 @@ public class MenuService {
     		menuEntity = menuDao.save(menuEntity);
     		return convertMenuEntityToMenuTO(menuEntity);
     	} catch(DataAccessException e) {
-    		throw new Exception("Error while creating menu! - " + e.getMessage());
+    		throw new MenuCreationException("Error while creating menu! - " + e.getMessage());
     	}
     }
 
@@ -54,7 +55,7 @@ public class MenuService {
     	try {
     		menuDao.deleteById(menuId);    		
     	} catch(DataAccessException e) {
-    		throw new Exception("Error while deleting menu! - " + e.getMessage());
+    		throw new MenuCreationException("Error while deleting menu! - " + e.getMessage());
     	}
     }
     
@@ -66,67 +67,69 @@ public class MenuService {
     			return menuTO;
     		}).toList();    		
     	} catch(DataAccessException e) {
-    		throw new Exception("Error while getting menu! - " + e.getMessage());
+    		throw new MenuCreationException("Error while getting menu! - " + e.getMessage());
     	}
     }
     
-    public List<MenuItemTO> getMenuForRestaurant(int restaurantId, Map<String, String> filter) {
+    // public List<MenuItemTO> getMenuForRestaurant(int restaurantId, Map<String, String> filter) {
     	
-    	try {			
-    		List<MenuItemTO> menu = getMenuForRestaurant(restaurantId);
+    // 	try {			
+    // 		List<MenuItemTO> menu = getMenuForRestaurant(restaurantId);
     		
-    		List<MenuItemTO> filteredMenu = menu;
+    // 		List<MenuItemTO> filteredMenu = menu;
     		
-    		List<Predicate<MenuItemTO>> menuMatchers = new ArrayList<>();
+    // 		List<Predicate<MenuItemTO>> menuMatchers = new ArrayList<>();
     		
     		
-    		if(filter.containsKey("itemName")) {
-    			String nameStr = filter.get("itemName");
-    			menuMatchers.add((menuTO) -> {
-    				return menuTO.getName().contains(nameStr);
-    			});
-    		}
+    // 		if(filter.containsKey("itemName")) {
+    // 			String nameStr = filter.get("itemName");
+    // 			menuMatchers.add((menuTO) -> {
+    // 				return menuTO.getName().contains(nameStr);
+    // 			});
+    // 		}
     		
-    		Predicate<MenuItemTO> menuMatcher = menuMatchers.stream().reduce(x -> true, Predicate::and);
+    // 		Predicate<MenuItemTO> menuMatcher = menuMatchers.stream().reduce(x -> true, Predicate::and);
     		
-    		filteredMenu = filteredMenu.stream()
-    				.filter(menuMatcher)
-    				.toList();
+    // 		filteredMenu = filteredMenu.stream()
+    // 				.filter(menuMatcher)
+    // 				.toList();
     		
-    		return filteredMenu;
+    // 		return filteredMenu;
     		
-		} catch(Exception e) {
-			throw new Exception("Error while getting menu! - " + e.getMessage());
-		}
-    }
+	// 	} catch (Exception e) {
+	// 		throw e;}
+	// 	catch(Exception e) {
+	// 		throw new Exception("Error while getting menu! - " + e.getMessage());
+	// 	}
+    // }
     
-    public List<SearchResultTO> searchMenu(Map<String, String> filter) {
+    // public List<SearchResultTO> searchMenu(Map<String, String> filter) {
     	
-    	List<SearchResultTO> searchResults = new ArrayList<>();
+    // 	List<SearchResultTO> searchResults = new ArrayList<>();
     	
-    	if(filter.size() == 0) return searchResults;
+    // 	if(filter.size() == 0) return searchResults;
     	
-    	try {
-    		List<RestaurantEntity> restaurantEntities = restaurantDao.findAll();
+    // 	try {
+    // 		List<RestaurantEntity> restaurantEntities = restaurantDao.findAll();
     		
-    		for (RestaurantEntity restaurantEntity : restaurantEntities) {
-    			List<MenuItemTO> filteredMenu = getMenuForRestaurant(restaurantEntity.getId(), filter);     		
-    			if(filteredMenu.size() > 0) {
-    				SearchResultTO searchResultTO = new SearchResultTO();
-    				RestaurantTO restaurantTO = new RestaurantTO();
-    				BeanUtils.copyProperties(restaurantEntity, restaurantTO);
-    				searchResultTO.setRestaurant(restaurantTO);
-    				searchResultTO.setMenu(filteredMenu);
-    				searchResults.add(searchResultTO);
-    			}				
-			}
+    // 		for (RestaurantEntity restaurantEntity : restaurantEntities) {
+    // 			List<MenuItemTO> filteredMenu = getMenuForRestaurant(restaurantEntity.getId(), filter);     		
+    // 			if(filteredMenu.size() > 0) {
+    // 				SearchResultTO searchResultTO = new SearchResultTO();
+    // 				RestaurantTO restaurantTO = new RestaurantTO();
+    // 				BeanUtils.copyProperties(restaurantEntity, restaurantTO);
+    // 				searchResultTO.setRestaurant(restaurantTO);
+    // 				searchResultTO.setMenu(filteredMenu);
+    // 				searchResults.add(searchResultTO);
+    // 			}				
+	// 		}
     		    		
-    		return searchResults;    		
+    // 		return searchResults;    		
     		
-    	} catch(DataAccessException e) {
-    		throw new Exception("Error while searching menu! - " + e.getMessage());
-    	}
-    }
+    // 	} catch(DataAccessException e) {
+    // 		throw new Exception("Error while searching menu! - " + e.getMessage());
+    // 	}
+    // }
     
     private MenuItemTO convertMenuEntityToMenuTO(MenuItemEntity menuEntity) {
     	MenuItemTO menuTO = new MenuItemTO();
@@ -137,41 +140,32 @@ public class MenuService {
     public void checkIfMenuItemIdExist(int menuItemId) {
     	if(!menuDao.existsById(menuItemId)) {
     		String errorMsg = String.format("Menu item id = '%s' does not exist", menuItemId);
-    		throw new Exception(HttpStatus.BAD_REQUEST, errorMsg);
+    		throw new MenuCreationException(errorMsg);
     	}
     }
     
     public void validateMenuTO(MenuItemTO menuTO) {
 
-    	if(Objects.isNull(menuTO.getName())) {
-    		throw new Exception(HttpStatus.BAD_REQUEST, "Menu item name is missing. Please provide menu item name.");
+    	if(Objects.isNull(menuTO.getItemName())) {
+    		throw new Exception("Menu item name is missing. Please provide menu item name.");
     	}
 
     	if(Objects.isNull(menuTO.getRestaurantId())) {
-    		throw new Exception(HttpStatus.BAD_REQUEST, "Restaurant id is missing. Please provide restaurant id.");
-    	}
-
-    	if(Objects.isNull(menuTO.getCuisineId())) {
-    		throw new Exception(HttpStatus.BAD_REQUEST, "Cuisine id is missing. Please provide cuisine id.");
+    		throw new MenuCreationException("Restaurant id is missing. Please provide restaurant id.");
     	}
     	
     	if(Objects.isNull(menuTO.getCategoryId())) {
-    		throw new Exception(HttpStatus.BAD_REQUEST, "Menu category id is missing. Please provide menu category id.");
+    		throw new MenuCreationException("Menu category id is missing. Please provide menu category id.");
     	}
     	
     	if(!restaurantDao.existsById(menuTO.getRestaurantId())) {
     		String errorMsg = String.format("Restaurant id = '%s' is invalid", menuTO.getRestaurantId());
-    		throw new Exception(HttpStatus.BAD_REQUEST, errorMsg);
-    	}
-    	
-    	if(!cuisineDao.existsById(menuTO.getCuisineId())) {
-    		String errorMsg = String.format("Cuisine category id = '%s' is invalid", menuTO.getCuisineId());
-    		throw new Exception(HttpStatus.BAD_REQUEST, errorMsg);
+    		throw new MenuCreationException(errorMsg);
     	}
     	
     	if(!menuCategoryDao.existsById(menuTO.getCategoryId())) {
     		String errorMsg = String.format("Menu category id = '%s' is invalid", menuTO.getCategoryId());
-    		throw new Exception(HttpStatus.BAD_REQUEST, errorMsg);
+    		throw new MenuCreationException(errorMsg);
     	}
     }
 }

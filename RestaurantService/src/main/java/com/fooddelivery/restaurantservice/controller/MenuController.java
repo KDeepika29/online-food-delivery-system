@@ -18,12 +18,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fooddelivery.restaurantservice.service.MenuService;
+import com.fooddelivery.restaurantservice.entity.MenuItemEntity;
 import com.fooddelivery.restaurantservice.to.MenuItemTO;
 import com.fooddelivery.restaurantservice.to.SearchResultTO;
-import com.fooddelivery.security.Authorize;
-import com.fooddelivery.security.Role;
-import com.fooddelivery.to.ResponseTO;
-import com.fooddelivery.to.SuccessResponseTO;
 
 @RestController
 @ResponseBody
@@ -33,53 +30,33 @@ public class MenuController {
 	@Autowired
 	MenuService menuService;
 	
-	@Authorize(roles = {Role.RESTAURANT_OWNER})
     @PostMapping
-    public ResponseEntity<ResponseTO> createMenu(@RequestBody MenuItemTO menuTO) {
-    	try {
-    		menuService.validateMenuTO(menuTO);
-    		menuTO.setId(null);
-    		var createdMenuItem = menuService.createMenu(menuTO);
-    		return SuccessResponseTO.create(createdMenuItem, HttpStatus.CREATED);
-    	} catch(Exception e) {
-    		throw new Exception("Error while creating menu!- " + e.getMessage());
-    	}
+    public ResponseEntity<MenuItemEntity> createMenu(@RequestBody MenuItemTO menuTO) {
+		menuService.validateMenuTO(menuTO);
+		menuTO.setId(null);
+		MenuItemEntity createdMenuItem = menuService.createMenu(menuTO);
+		return ResponseEntity.ok(createdMenuItem);
     }
 
-	@Authorize(roles = {Role.RESTAURANT_OWNER})
     @PutMapping("/{menuItemId}")
-    public ResponseEntity<ResponseTO> updateMenu(@RequestBody MenuItemTO menuTO, @PathVariable int menuItemId) {
-    	try {
-    		menuService.checkIfMenuItemIdExist(menuItemId);
-    		menuService.validateMenuTO(menuTO);
-    		menuTO.setId(menuItemId);
-    		var updatedMenuItem = menuService.updateMenu(menuTO);
-    		return SuccessResponseTO.create(updatedMenuItem);
-    	} catch(Exception e) {
-    		throw new Exception("Errow while updating menu!- " + e.getMessage());
-    	}
+    public ResponseEntity<MenuItemEntity> updateMenu(@RequestBody MenuItemTO menuTO, @PathVariable int menuItemId) {
+		menuService.checkIfMenuItemIdExist(menuItemId);
+		menuService.validateMenuTO(menuTO);
+		menuTO.setId(menuItemId);
+		MenuItemEntity updatedMenuItem = menuService.updateMenu(menuTO);
+		return ResponseEntity.ok(updatedMenuItem);
     }
 
-	@Authorize(roles = {Role.RESTAURANT_OWNER})
     @DeleteMapping("/{menuItemId}")
-    public ResponseEntity<ResponseTO> deleteMenu(@PathVariable int menuItemId) {
-    	try {			
-    		menuService.checkIfMenuItemIdExist(menuItemId);
-    		menuService.deleteMenu(menuItemId);
-    		return SuccessResponseTO.create(menuItemId);
-		} catch (Exception e) {
-			throw new Exception("Error while deleting the menu!- " + e.getMessage());
-		}
+    public ResponseEntity<String> deleteMenu(@PathVariable int menuItemId) {	
+		menuService.checkIfMenuItemIdExist(menuItemId);
+		menuService.deleteMenu(menuItemId);
+		return ResponseEntity.ok("Menu item deleted successfully.");
     }
 	
-	@Authorize(roles = {Role.CUSTOMER})
     @GetMapping("/search")
-    public ResponseEntity<ResponseTO> searchMenu(@RequestParam Map<String, String> filter) {
-    	try {
-    		List<SearchResultTO> searchResults = menuService.searchMenu(filter); 
-    		return SuccessResponseTO.create(searchResults);			
-		} catch (Exception e) {
-			throw new Exception("Error while searching menu!- " + e.getMessage());
-		}
-    }
+    public ResponseEntity<MenuItemEntity> searchMenu(@RequestParam Map<String, String> filter) {
+		List<SearchResultTO> searchResults = menuService.searchMenu(filter);
+		return ResponseEntity.ok(searchResults);
+	}
 }
