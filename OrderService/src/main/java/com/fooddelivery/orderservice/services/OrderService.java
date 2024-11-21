@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class OrderService {
@@ -19,11 +20,11 @@ public class OrderService {
         return orderRepository.save(order);
     }
 
-    public Optional<Order> getOrderById(Long id) {
+    public Optional<Order> getOrderById(UUID id) {
         return orderRepository.findById(id);
     }
 
-    public Order updateOrderStatus(Long id, String status) {
+    public Order updateOrderStatus(UUID id, String status) {
         Optional<Order> orderOptional = orderRepository.findById(id);
         if (orderOptional.isPresent()) {
             Order order = orderOptional.get();
@@ -33,7 +34,7 @@ public class OrderService {
         return null;
     }
 
-    public List<Order> getOrdersByUserId(Long userId) {
+    public List<Order> getOrdersByUserId(UUID userId) {
         return orderRepository.findByUserId(userId);
     }
 
