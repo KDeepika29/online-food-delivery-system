@@ -5,6 +5,9 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.GenericGenerator;
+
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -14,12 +17,17 @@ import lombok.Setter;
 public class Order {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(
+            name = "UUID",
+            strategy = "org.hibernate.id.UUIDGenerator"
+    )
+    @Column(name = "id", updatable = false, nullable = false)
     @JsonProperty("id")
-    private Long id;
+    private UUID id;
     @Column(name = "userId")
     @JsonProperty("userId")
-    private Long userId;
+    private UUID userId;
     @Column(name = "restaurantId")
     @JsonProperty("restaurantId")
     private Long restaurantId;

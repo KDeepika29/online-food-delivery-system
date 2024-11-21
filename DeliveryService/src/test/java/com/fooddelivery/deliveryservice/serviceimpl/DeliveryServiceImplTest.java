@@ -20,11 +20,13 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fooddelivery.deliveryservice.dao.DeliveriesDao;
 import com.fooddelivery.deliveryservice.entity.DeliveriesEntity;
 import com.fooddelivery.deliveryservice.to.DeliveriesTO;
+import com.fooddelivery.deliveryservice.to.OrderTO;
 
 @ActiveProfiles("test")
 @AutoConfigureMockMvc(addFilters=false)
@@ -39,6 +41,9 @@ public class DeliveryServiceImplTest {
 	
 	@MockBean
 	private DeliveriesDao deliveryDao;
+	
+	@MockBean
+	private RestTemplate restTemplate;
 	
 	@SpyBean
 	private DeliveryServiceImpl service;
@@ -69,6 +74,12 @@ public class DeliveryServiceImplTest {
 		mockDeliveryTO.setStatus(mockDeliveryEntity.getStatus());
 		mockDeliveryTO.setUpdatedAt(mockDeliveryEntity.getUpdatedAt());
 		
+		OrderTO orderTO = new OrderTO();
+		orderTO.setId(uuid);
+		orderTO.setPaymentStatus("Completed");
+		orderTO.setStatus("Completed");
+		
+		doReturn(Optional.of(orderTO)).when(service).fetchOrderById(Mockito.any());
 		doReturn(mockDeliveryEntity).when(deliveryDao).save(Mockito.any());
 
         DeliveriesEntity result = service.createDelivery(mockDeliveryTO);

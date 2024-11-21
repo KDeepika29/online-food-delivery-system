@@ -4,27 +4,45 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.server.ResponseStatusException;
 
-import com.fooddelivery.deliveryservice.constant.DeliveryConstant.Delivery_Person_Status;
 import com.fooddelivery.deliveryservice.constant.DeliveryConstant.Status;
 import com.fooddelivery.deliveryservice.dao.DeliveriesDao;
 import com.fooddelivery.deliveryservice.entity.DeliveriesEntity;
-import com.fooddelivery.deliveryservice.entity.DeliveryPersonEntity;
 import com.fooddelivery.deliveryservice.service.DeliveryService;
 import com.fooddelivery.deliveryservice.to.DeliveriesTO;
-import com.fooddelivery.deliveryservice.to.DeliveryPersonTO;
+import com.fooddelivery.deliveryservice.to.OrderTO;
+
 
 @Service
 public class DeliveryServiceImpl implements DeliveryService {
 
 	@Autowired
 	DeliveriesDao deliveriesDao;
+	
+	 @Autowired
+	 private RestTemplate restTemplate;
 
+	 public Optional<OrderTO> fetchOrderById(UUID orderId) {
+	        String url = "http://localhost:8081/orders/" + orderId; 
+	        return Optional.ofNullable(restTemplate.getForObject(url, OrderTO.class));
+	    }
 	@Override
 	public DeliveriesEntity createDelivery(DeliveriesTO deliveryTO) {
+		
+		 Optional<OrderTO> orderTO = fetchOrderById(deliveryTO.getOrderId());
+	        if (orderTO.isEmpty()) {
+	            throw new RuntimeException("Order not found with ID: " + deliveryTO.getOrderId());
+	        }
+	      if(!orderTO.get().getStatus().equals("Completed")) {
+	    	  throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"The order is not prepared yet " + deliveryTO.getOrderId());
+	      }
+	        
+
 
 		DeliveriesEntity deliveryEntity = new DeliveriesEntity();
 		deliveryEntity.setId(deliveryTO.getId());
