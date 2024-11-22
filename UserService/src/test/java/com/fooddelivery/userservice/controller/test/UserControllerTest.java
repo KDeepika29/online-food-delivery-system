@@ -1,7 +1,10 @@
 package com.fooddelivery.userservice.controller.test;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -16,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
@@ -86,4 +90,19 @@ public class UserControllerTest {
 				.content("{\"passwordHash\":\"newPasswordHash\",\"phone\":\"0987654321\"}")).andExpect(status().isOk())
 				.andExpect(content().string("User profile updated successfully"));
 	}
+	
+	@Test
+    void deleteUser_UserExists_Success() throws Exception {
+        UUID userId = UUID.randomUUID();
+
+       
+        doNothing().when(userService).deleteUser(userId);
+
+    
+        mockMvc.perform(delete("/user/delete-user")
+                .param("userId", userId.toString())
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().string("User deleted successfully."));
+    }
 }
