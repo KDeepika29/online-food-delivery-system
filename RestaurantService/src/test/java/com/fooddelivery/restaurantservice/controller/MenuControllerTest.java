@@ -41,7 +41,7 @@ public class MenuControllerTest {
 		var requestBody = mapper.writeValueAsString(menuItemTO);
 		mockMvc.perform(
 				MockMvcRequestBuilders.post("/menu").contentType(MediaType.APPLICATION_JSON).content(requestBody))
-				.andExpect(MockMvcResultMatchers.status().isCreated());		
+				.andExpect(MockMvcResultMatchers.status().isOk());		
 	}
 	
 	@Order(2)

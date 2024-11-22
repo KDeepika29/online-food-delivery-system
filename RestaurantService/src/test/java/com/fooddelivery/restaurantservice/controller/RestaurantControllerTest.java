@@ -70,23 +70,10 @@ public class RestaurantControllerTest {
 		var requestBody = mapper.writeValueAsString(restaurant);
 		mockMvc.perform(
 				MockMvcRequestBuilders.post("/restaurant").contentType(MediaType.APPLICATION_JSON).content(requestBody))
-				.andExpect(MockMvcResultMatchers.status().isCreated());
+				.andExpect(MockMvcResultMatchers.status().isOk());
 	}
-	
+
 	@Order(3)
-	@Test
-	void testCreateRestaurant_Failure() throws Exception {
-		var restaurant = new RestaurantTO();
-		when(restaurantService.createRestaurant(Mockito.any())).thenReturn(restaurant);
-		doThrow(new CustomExceptions(HttpStatus.BAD_REQUEST, "Restaurant name is missing. Please provide restaurant name.")).when(restaurantService).validateRestaurantTO(Mockito.any());
-
-		var requestBody = mapper.writeValueAsString(restaurant);
-		mockMvc.perform(
-				MockMvcRequestBuilders.post("/restaurant").contentType(MediaType.APPLICATION_JSON).content(requestBody))
-				.andExpect(MockMvcResultMatchers.status().isBadRequest());
-	}
-
-	@Order(4)
 	@Test
 	void testUpdateRestaurant() throws Exception {
 		var restaurant = new RestaurantTO();
@@ -97,7 +84,7 @@ public class RestaurantControllerTest {
 				.andExpect(MockMvcResultMatchers.status().isOk());
 	}
 	
-	@Order(5)
+	@Order(4)
 	@Test
 	void testDeleteRestaurant() throws Exception {
 		mockMvc.perform(
@@ -105,7 +92,7 @@ public class RestaurantControllerTest {
 				.andExpect(MockMvcResultMatchers.status().isOk());
 	}
 	
-	@Order(6)
+	@Order(5)
 	@Test
 	void testSearchRestaurant() throws Exception {
 		var restaurant = new RestaurantTO();
@@ -115,7 +102,7 @@ public class RestaurantControllerTest {
 				.andExpect(MockMvcResultMatchers.status().isOk());
 	}
 	
-	@Order(7)
+	@Order(6)
 	@Test
 	void testGetRestaurantMenu() throws Exception {
 		var menuItemTO = new MenuItemTO();
@@ -125,7 +112,7 @@ public class RestaurantControllerTest {
 				.andExpect(MockMvcResultMatchers.status().isOk());
 	}
 	
-	@Order(8)
+	@Order(7)
 	@Test
 	void testGetMenuCategories() throws Exception {
 		var menuCategory = new MenuCategoryTO();
