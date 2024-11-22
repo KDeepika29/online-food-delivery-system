@@ -69,4 +69,11 @@ public class UserService {
 		userRepository.save(user);
 		return "User profile updated successfully!";
 	}
+
+	public void deleteUser(UUID userId) {
+        if (!userRepository.existsById(userId)) {
+            throw new RuntimeException("User not found");
+        }
+        userRepository.deleteById(userId);
+    }
 }

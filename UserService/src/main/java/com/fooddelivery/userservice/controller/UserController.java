@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -46,4 +47,10 @@ public class UserController {
 	public ResponseEntity<String> updateProfile(@RequestParam UUID userId, @RequestBody User user) {
 		return ResponseEntity.ok(userService.updateUserProfile(userId, user.getPasswordHash(), user.getPhone()));
 	}
+	
+	@DeleteMapping("/delete-user")
+    public ResponseEntity<String> deleteUser(@RequestParam UUID userId) {
+        userService.deleteUser(userId);
+        return ResponseEntity.ok("User deleted successfully.");
+    }
 }
